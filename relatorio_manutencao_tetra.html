@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Relatório de Manutenção - Tetra</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{--bg:#f8fafc;--card:#ffffff;--primary:#0b5ed7}
+  body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);margin:0;padding:18px;color:#0f172a}
+  .wrap{max-width:820px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.06)}
+  h1{font-size:20px;margin:0 0 10px;color:var(--primary)}
+  label{display:block;font-weight:600;margin-top:12px}
+  input[type="text"],input[type="date"],select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin-top:6px;font-size:15px;box-sizing:border-box}
+  button{background:var(--primary);color:white;padding:10px 12px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin-top:14px}
+  button.ghost{background:#e7eefc;color:var(--primary)}
+  .equip{background:#f9fafb;border-radius:10px;padding:12px;margin-top:12px;border:1px solid #e2e8f0}
+  .equip h4{margin:0 0 6px;font-size:15px}
+  .remove{background:#ef4444;padding:8px;border-radius:8px;color:white;border:0;cursor:pointer;margin-top:8px}
+  #resultado{width:100%;height:220px;margin-top:14px;padding:12px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;white-space:pre-wrap;font-family:monospace}
+  .hint{font-size:13px;color:#475569;margin-top:8px}
+  footer{margin-top:12px;font-size:13px;color:#64748b;text-align:center}
+  @media(max-width:640px){.row{flex-direction:column}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>📋 Relatório de Manutenção (Tetra)</h1>
+
+    <label>Data</label>
+    <input id="data" type="date" />
+
+    <div class="row" style="display:flex;gap:10px">
+      <div class="col" style="flex:1">
+        <label>Turno</label>
+        <select id="turno">
+          <option>1º Turno</option>
+          <option selected>2º Turno</option>
+          <option>3º Turno</option>
+        </select>
+      </div>
+      <div class="col" style="flex:1">
+        <label>Técnico Responsável</label>
+        <input id="tecnico" type="text" placeholder="Nome do técnico" />
+      </div>
+    </div>
+
+    <label style="margin-top:14px">Eventos de Manutenção</label>
+    <div id="listaEquipamentos" aria-live="polite"></div>
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button id="btnAdd">➕ Adicionar Equipamento</button>
+      <button id="btnClear" class="ghost">Limpar Tudo</button>
+    </div>
+
+    <label style="margin-top:12px">Necessita Plano Preventivo?</label>
+    <select id="preventivo">
+      <option value="Não" selected>Não</option>
+      <option value="Sim">Sim</option>
+    </select>
+
+    <div id="areaPreventivo" style="display:none;margin-top:10px;padding:12px;border-radius:10px;background:#fff8dc;border:1px solid #f4e7a1">
+      <label>Marque os equipamentos que precisam de preventivo</label>
+      <div id="checkboxPreventivo" style="margin-top:8px"></div>
+      <label style="margin-top:10px">Observações do Preventivo</label>
+      <textarea id="obsPreventivo" rows="3" placeholder="Descreva detalhes do plano preventivo"></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button id="btnGerar">📄 Gerar Relatório</button>
+      <button id="btnEnviar" class="ghost">💬 Enviar via WhatsApp</button>
+    </div>
+
+    <textarea id="resultado" readonly placeholder="O relatório gerado aparecerá aqui..."></textarea>
+    <div class="hint">Abra no Safari (iPhone) ou Chrome (Android). Toque em “Adicionar à tela inicial” para usar como app.</div>
+    <footer>Versão Tetra • Relatório de Manutenção</footer>
+  </div>
+
+<script>
+// ================== Lógica ==================
+(function setDefaultDate(){
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  document.getElementById('data').value = `${yyyy}-${mm}-${dd}`;
+})();
+
+let contador = 0;
+
+// Adiciona evento de clique para adicionar equipamento
+document.getElementById('btnAdd').addEventListener('click', () => adicionarEquipamento());
+
+// Adiciona novo equipamento
+function adicionarEquipamento(inicialNome='', inicialProb='', inicialAcao=''){
+  contador++;
+  const idBase = 'equip' + contador;
+  const div = document.createElement('div');
+  div.className = 'equip';
+  div.id = idBase;
+
+  div.innerHTML = `
+    <h4>Equipamento ${contador}</h4>
+    <label>Nome do Equipamento</label>
+    <input type="text" class="campoEquip" placeholder="Ex: Cap 30A" value="${inicialNome}">
+    <label style="margin-top:8px">Problema</label>
+    <textarea class="campoProb" rows="2" placeholder="Descreva o problema">${inicialProb}</textarea>
+    <label style="margin-top:8px">Ação</label>
+    <textarea class="campoAcao" rows="2" placeholder="Descreva a ação realizada">${inicialAcao}</textarea>
+    <button class="remove">Remover</button>
+  `;
+
+  // Adiciona o botão de remover com listener (funciona no iOS)
+  const botaoRemover = div.querySelector('.remove');
+  botaoRemover.addEventListener('click', () => {
+    div.remove();
+    atualizarCheckboxPreventivo();
+  });
+
+  document.getElementById('listaEquipamentos').appendChild(div);
+  atualizarCheckboxPreventivo();
+}
+
+// Atualiza lista de checkboxes de preventivo
+function atualizarCheckboxPreventivo(){
+  const container = document.getElementById('checkboxPreventivo');
+  container.innerHTML = '';
+  document.querySelectorAll('.equip').forEach((el, idx) => {
+    const nome = el.querySelector('.campoEquip').value || `Equipamento ${idx+1}`;
+    const label = document.createElement('label');
+    label.style.display = 'block';
+    label.innerHTML = `<input type="checkbox" value="${nome}"> ${nome}`;
+    container.appendChild(label);
+  });
+}
+
+// Mostra/oculta área de preventivo
+document.getElementById('preventivo').addEventListener('change', function(){
+  document.getElementById('areaPreventivo').style.display = this.value === 'Sim' ? 'block' : 'none';
+});
+
+// Gera relatório
+document.getElementById('btnGerar').addEventListener('click', function(){
+  const dataIso = document.getElementById('data').value;
+  const data = formatDataBR(dataIso);
+  const turno = document.getElementById('turno').value;
+  const tecnico = document.getElementById('tecnico').value.trim() || '(não informado)';
+
+  const equipamentos = document.querySelectorAll('.equip');
+  if(equipamentos.length === 0){
+    alert('Adicione pelo menos um equipamento.');
+    return;
+  }
+
+  let texto = '📋 Relatório de Manutenção\\n';
+  texto += `📅 Data: ${data}\\n`;
+  texto += `🕓 Turno: ${turno}\\n`;
+  texto += `👷 Técnico Responsável: ${tecnico}\\n\\n`;
+
+  equipamentos.forEach(el => {
+    const nome = el.querySelector('.campoEquip').value.trim() || '(não informado)';
+    const prob = el.querySelector('.campoProb').value.trim();
+    const acao = el.querySelector('.campoAcao').value.trim();
+    texto += `⚙️ Equipamento: ${nome}\\n`;
+    if(prob) texto += `❗ Problema: ${prob}\\n`;
+    if(acao) texto += `🔧 Ação: ${acao}\\n\\n`;
+  });
+
+  const need = document.getElementById('preventivo').value;
+  texto += `🛠️ Necessita Plano Preventivo? ${need}\\n`;
+  if(need === 'Sim'){
+    const selecionados = Array.from(document.querySelectorAll('#checkboxPreventivo input:checked')).map(cb => cb.value);
+    const obs = document.getElementById('obsPreventivo').value.trim();
+    texto += `Equipamentos para Preventivo: ${selecionados.join(', ') || '(nenhum marcado)'}\\n`;
+    if(obs) texto += `Observações: ${obs}\\n`;
+  }
+
+  document.getElementById('resultado').value = texto.trim();
+});
+
+// Envia via WhatsApp
+document.getElementById('btnEnviar').addEventListener('click', function(){
+  const texto = document.getElementById('resultado').value;
+  if(!texto){ alert('Gere o relatório antes de enviar.'); return; }
+  const url = 'https://wa.me/?text=' + encodeURIComponent(texto);
+  window.open(url, '_blank');
+});
+
+// Limpar tudo
+document.getElementById('btnClear').addEventListener('click', function(){
+  if(!confirm('Deseja limpar todos os campos?')) return;
+  document.getElementById('listaEquipamentos').innerHTML = '';
+  document.getElementById('resultado').value = '';
+  document.getElementById('tecnico').value = '';
+  document.getElementById('obsPreventivo').value = '';
+  contador = 0;
+  atualizarCheckboxPreventivo();
+});
+
+function formatDataBR(iso){
+  if(!iso) return '';
+  const p = iso.split('-');
+  return p[2] + '/' + p[1] + '/' + p[0];
+}
+</script>
+</body>
+</html>
