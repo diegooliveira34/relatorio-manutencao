@@ -1,173 +1,132 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relatório de Manutenção</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f1f5f9; margin: 0; padding: 20px; color: #222; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #2563eb; margin: 0 0 10px 0; }
-    label { font-weight: bold; display: block; margin-top: 12px; }
-    input, textarea, select, button { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-top: 5px; font-size: 15px; box-sizing: border-box; }
-    .row { display: flex; gap: 8px; }
-    .row > * { flex: 1; }
-    button { background-color: #2563eb; color: white; cursor: pointer; margin-top: 14px; }
-    button.secondary { background: #06b6d4; }
-    button:active { transform: translateY(1px); }
-    #resultado { white-space: pre-wrap; background: #f9fafb; border-radius: 8px; padding: 12px; margin-top: 14px; font-family: monospace; min-height: 60px; }
-    small.hint { color: #555; display: block; margin-top: 6px; }
-    footer { text-align:center; margin-top: 14px; color:#666; font-size:13px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Manutenção v3</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }
+  h2 { text-align: center; color: #333; }
+  label { font-weight: bold; margin-top: 10px; display: block; }
+  input, select, textarea { width: 100%; padding: 6px; margin-top: 4px; border-radius: 5px; border: 1px solid #ccc; }
+  button { margin-top: 10px; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
+  .add-btn { background-color: #28a745; color: white; }
+  .remove-btn { background-color: #dc3545; color: white; margin-top: 5px; }
+  .generate-btn { background-color: #007bff; color: white; }
+  .equipamento { background: #fff; padding: 10px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .preventivo-area { display: none; background: #fff3cd; padding: 10px; border-radius: 10px; margin-top: 10px; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>📋 Relatório de Manutenção</h2>
 
-    <label>Data:</label>
-    <input type="date" id="data" />
+<h2>📋 Relatório de Manutenção</h2>
 
-    <label>Turno:</label>
-    <select id="turno">
-      <option value="1º Turno">1º Turno</option>
-      <option value="2º Turno">2º Turno</option>
-      <option value="3º Turno">3º Turno</option>
-    </select>
+<label>Data:</label>
+<input type="date" id="data">
 
-    <div class="row">
-      <div>
-        <label>Equipamento:</label>
-        <input type="text" id="equipamento" placeholder="Ex: Cap 30A" />
-      </div>
-      <div>
-        <label>Oficina (opcional):</label>
-        <input type="text" id="oficina" placeholder="Ex: Lavando a oficina" />
-      </div>
-    </div>
+<label>Turno:</label>
+<select id="turno">
+  <option value="1º Turno">1º Turno</option>
+  <option value="2º Turno">2º Turno</option>
+  <option value="3º Turno">3º Turno</option>
+</select>
 
+<label>Técnico Responsável:</label>
+<input type="text" id="tecnico" placeholder="Digite o nome do técnico">
+
+<div id="equipamentos"></div>
+<button class="add-btn" onclick="adicionarEquipamento()">➕ Adicionar Equipamento</button>
+
+<label>Necessita Plano Preventivo?</label>
+<select id="preventivo" onchange="togglePreventivo()">
+  <option value="Não">Não</option>
+  <option value="Sim">Sim</option>
+</select>
+
+<div class="preventivo-area" id="preventivoArea">
+  <label>Selecione os Equipamentos:</label>
+  <div id="listaPreventivo"></div>
+  <label>Observações:</label>
+  <textarea id="obsPreventivo" placeholder="Descreva detalhes do plano preventivo..."></textarea>
+</div>
+
+<button class="generate-btn" onclick="gerarRelatorio()">📄 Gerar Relatório</button>
+<button class="generate-btn" onclick="enviarWhatsApp()">💬 Enviar via WhatsApp</button>
+
+<textarea id="resultado" rows="12" readonly placeholder="O relatório gerado aparecerá aqui..."></textarea>
+
+<script>
+let contador = 0;
+
+function adicionarEquipamento() {
+  contador++;
+  const div = document.createElement('div');
+  div.classList.add('equipamento');
+  div.innerHTML = `
+    <label>Equipamento:</label>
+    <input type="text" id="equipamento${contador}" placeholder="Nome do equipamento">
     <label>Problema:</label>
-    <textarea id="problema" placeholder="Descreva o problema" rows="3"></textarea>
-
+    <textarea id="problema${contador}" placeholder="Descreva o problema..."></textarea>
     <label>Ação:</label>
-    <textarea id="acao" placeholder="Descreva a ação realizada" rows="3"></textarea>
+    <textarea id="acao${contador}" placeholder="Descreva a ação realizada..."></textarea>
+    <button class="remove-btn" onclick="this.parentElement.remove()">Remover</button>
+  `;
+  document.getElementById('equipamentos').appendChild(div);
+  atualizarListaPreventivo();
+}
 
-    <div class="row">
-      <button onclick="gerarRelatorio()">Gerar Relatório</button>
-      <button class="secondary" onclick="limparCampos()">Limpar</button>
-    </div>
-    <div class="row">
-      <button onclick="enviarWhatsApp()">Enviar via WhatsApp</button>
-    </div>
-
-    <div id="resultado"></div>
-    <small class="hint">Dica: abra este arquivo no Chrome no celular para usar como aplicativo (Adicionar à tela inicial).</small>
-
-    <footer>Relatório Técnico • Gerado localmente</footer>
-  </div>
-
-  <script>
-    // Preenche data com data atual
-    (function setDefaultDate() {
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth()+1).padStart(2,'0');
-      const dd = String(d.getDate()).padStart(2,'0');
-      const iso = yyyy + '-' + mm + '-' + dd;
-      document.getElementById('data').value = iso;
-    })();
-
-    // Função para tocar um beep curto usando Web Audio API
-    function playBeep(duration = 0.08, frequency = 880, volume = 0.08) {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = 'sine';
-        o.frequency.value = frequency;
-        g.gain.value = volume;
-        o.connect(g);
-        g.connect(ctx.destination);
-        o.start();
-        setTimeout(function(){
-          o.stop();
-          ctx.close();
-        }, duration * 1000);
-      } catch (e) {
-        // Fallback: não fazer nada se não suportado
-        console.log('Audio not supported', e);
-      }
+function atualizarListaPreventivo() {
+  const listaDiv = document.getElementById('listaPreventivo');
+  listaDiv.innerHTML = '';
+  for (let i = 1; i <= contador; i++) {
+    const equip = document.getElementById(`equipamento${i}`);
+    if (equip) {
+      listaDiv.innerHTML += `<label><input type="checkbox" value="${equip.value || 'Equipamento ' + i}"> ${equip.value || 'Equipamento ' + i}</label><br>`;
     }
+  }
+}
 
-    function gerarRelatorio() {
-      const data = document.getElementById('data').value;
-      const turno = document.getElementById('turno').value;
-      const equipamento = document.getElementById('equipamento').value.trim();
-      const problema = document.getElementById('problema').value.trim();
-      const acao = document.getElementById('acao').value.trim();
-      const oficina = document.getElementById('oficina').value.trim();
+function togglePreventivo() {
+  const area = document.getElementById('preventivoArea');
+  area.style.display = document.getElementById('preventivo').value === 'Sim' ? 'block' : 'none';
+}
 
-      if (!data) {
-        alert('Por favor selecione a data.');
-        return;
-      }
-      if (!equipamento && !problema && !acao && !oficina) {
-        alert('Preencha ao menos um campo para gerar o relatório.');
-        return;
-      }
-
-      // Monta a mensagem no padrão
-      let msg = '📋 Relatório de Manutenção\n';
-      msg += '📅 Data: ' + formatDateBR(data) + '\n';
-      msg += '🕓 Turno: ' + turno + '\n\n';
-
-      if (equipamento) {
-        msg += '⚙️ Equipamento: ' + equipamento + '\n';
-      }
-      if (problema) {
-        msg += '❗ Problema: ' + problema + '\n';
-      }
-      if (acao) {
-        msg += '🔧 Ação: ' + acao + '\n';
-      }
-      if (oficina) {
-        msg += '\n🧽 Oficina: ' + oficina + '\n';
-      }
-
-      document.getElementById('resultado').textContent = msg;
-      playBeep(); // som ao gerar
+function gerarRelatorio() {
+  let som = new Audio('https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg'); som.play();
+  const data = document.getElementById('data').value;
+  const turno = document.getElementById('turno').value;
+  const tecnico = document.getElementById('tecnico').value;
+  let relatorio = `📋 Relatório de Manutenção\n📅 Data: ${data}\n🕓 Turno: ${turno}\n👷 Técnico Responsável: ${tecnico}\n\n`;
+  
+  for (let i = 1; i <= contador; i++) {
+    const equip = document.getElementById(`equipamento${i}`);
+    const prob = document.getElementById(`problema${i}`);
+    const acao = document.getElementById(`acao${i}`);
+    if (equip) {
+      relatorio += `⚙️ Equipamento: ${equip.value}\n`;
+      if (prob.value) relatorio += `❗ Problema: ${prob.value}\n`;
+      if (acao.value) relatorio += `🔧 Ação: ${acao.value}\n\n`;
     }
+  }
 
-    function formatDateBR(isoDate) {
-      // isoDate no formato yyyy-mm-dd
-      const parts = isoDate.split('-');
-      if (parts.length === 3) {
-        return parts[2] + '/' + parts[1] + '/' + parts[0];
-      }
-      return isoDate;
-    }
+  const preventivo = document.getElementById('preventivo').value;
+  relatorio += `🛠️ Necessita Plano Preventivo? ${preventivo}\n`;
 
-    function enviarWhatsApp() {
-      const texto = document.getElementById('resultado').textContent;
-      if (!texto) {
-        alert('Gere o relatório antes de enviar.');
-        return;
-      }
-      playBeep(0.06, 660, 0.06); // som de confirmação
-      // Abre o WhatsApp Web/Aplicativo com a mensagem pronta
-      const url = 'https://wa.me/?text=' + encodeURIComponent(texto);
-      // tenta abrir em nova aba
-      window.open(url, '_blank');
-    }
+  if (preventivo === 'Sim') {
+    const selecionados = [...document.querySelectorAll('#listaPreventivo input:checked')].map(el => el.value);
+    const obs = document.getElementById('obsPreventivo').value;
+    relatorio += `Equipamentos para Preventivo: ${selecionados.join(', ')}\n`;
+    if (obs) relatorio += `Observações: ${obs}\n`;
+  }
 
-    function limparCampos() {
-      if (!confirm('Deseja limpar todos os campos?')) return;
-      document.getElementById('equipamento').value = '';
-      document.getElementById('problema').value = '';
-      document.getElementById('acao').value = '';
-      document.getElementById('oficina').value = '';
-      document.getElementById('resultado').textContent = '';
-      playBeep(0.04, 440, 0.04);
-    }
-  </script>
+  document.getElementById('resultado').value = relatorio.trim();
+}
+
+function enviarWhatsApp() {
+  let som = new Audio('https://actions.google.com/sounds/v1/cartoon/slide_whistle_to_drum_hit.ogg'); som.play();
+  const texto = encodeURIComponent(document.getElementById('resultado').value);
+  window.open(`https://wa.me/?text=${texto}`, '_blank');
+}
+</script>
 </body>
 </html>
