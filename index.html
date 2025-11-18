@@ -1,219 +1,173 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Relatório de Manutenção</title>
-
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background:#f1f5f9;
-    margin:0; padding:20px;
-}
-.container {
-    max-width:650px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    border-radius:15px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.15);
-}
-h2 {
-    text-align:center;
-    color:#1f2937;
-    font-weight:bold;
-}
-label {
-    font-weight:bold;
-    margin-top:12px;
-    display:block;
-}
-input, textarea, select {
-    width:100%;
-    padding:10px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    margin-top:5px;
-}
-button {
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    background:#2563eb;
-    color:white;
-    font-size:16px;
-    cursor:pointer;
-    margin-top:15px;
-}
-button.secondary { background:#0ea5e9; }
-button.danger { background:#dc2626; margin-top:10px; }
-#resultado {
-    white-space:pre-wrap;
-    background:#f9fafb;
-    padding:15px;
-    border-radius:10px;
-    margin-top:20px;
-    font-family: Arial, sans-serif;
-}
-.equipamento {
-    background:#f0f4f8;
-    border-radius:12px;
-    padding:12px;
-    margin-top:12px;
-}
-small {
-    display:block;
-    margin-top:10px;
-    text-align:center;
-    color:#6b7280;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório de Manutenção</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f1f5f9; margin: 0; padding: 20px; color: #222; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #2563eb; margin: 0 0 10px 0; }
+    label { font-weight: bold; display: block; margin-top: 12px; }
+    input, textarea, select, button { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-top: 5px; font-size: 15px; box-sizing: border-box; }
+    .row { display: flex; gap: 8px; }
+    .row > * { flex: 1; }
+    button { background-color: #2563eb; color: white; cursor: pointer; margin-top: 14px; }
+    button.secondary { background: #06b6d4; }
+    button:active { transform: translateY(1px); }
+    #resultado { white-space: pre-wrap; background: #f9fafb; border-radius: 8px; padding: 12px; margin-top: 14px; font-family: monospace; min-height: 60px; }
+    small.hint { color: #555; display: block; margin-top: 6px; }
+    footer { text-align:center; margin-top: 14px; color:#666; font-size:13px; }
+  </style>
 </head>
-
 <body>
-<div class="container">
+  <div class="container">
+    <h2>📋 Relatório de Manutenção</h2>
 
-<h2>📄 Relatório de Manutenção</h2>
+    <label>Data:</label>
+    <input type="date" id="data" />
 
-<label>📆 Data:</label>
-<input type="date" id="data">
+    <label>Turno:</label>
+    <select id="turno">
+      <option value="1º Turno">1º Turno</option>
+      <option value="2º Turno">2º Turno</option>
+      <option value="3º Turno">3º Turno</option>
+    </select>
 
-<label>⏱️ Turno:</label>
-<select id="turno">
-  <option>1º Turno</option>
-  <option>2º Turno</option>
-  <option>3º Turno</option>
-</select>
+    <div class="row">
+      <div>
+        <label>Equipamento:</label>
+        <input type="text" id="equipamento" placeholder="Ex: Cap 30A" />
+      </div>
+      <div>
+        <label>Oficina (opcional):</label>
+        <input type="text" id="oficina" placeholder="Ex: Lavando a oficina" />
+      </div>
+    </div>
 
-<label>👤 Técnico Responsável:</label>
-<input type="text" id="tecnico" placeholder="Nome do técnico">
+    <label>Problema:</label>
+    <textarea id="problema" placeholder="Descreva o problema" rows="3"></textarea>
 
-<h3 style="margin-top:18px;">Eventos de Manutenção</h3>
-<div id="eventos"></div>
+    <label>Ação:</label>
+    <textarea id="acao" placeholder="Descreva a ação realizada" rows="3"></textarea>
 
-<button onclick="adicionarEvento()">+ Adicionar Equipamento</button>
+    <div class="row">
+      <button onclick="gerarRelatorio()">Gerar Relatório</button>
+      <button class="secondary" onclick="limparCampos()">Limpar</button>
+    </div>
+    <div class="row">
+      <button onclick="enviarWhatsApp()">Enviar via WhatsApp</button>
+    </div>
 
-<label style="margin-top:15px;">🛡️ Necessita Plano Preventivo?</label>
-<select id="preventivo">
-  <option>Não</option>
-  <option>Sim</option>
-</select>
+    <div id="resultado"></div>
+    <small class="hint">Dica: abra este arquivo no Chrome no celular para usar como aplicativo (Adicionar à tela inicial).</small>
 
-<button onclick="gerarRelatorio()">Gerar Relatório</button>
-<button class="secondary" onclick="enviarWhatsApp()">Enviar via Whatsapp</button>
-<button class="secondary" onclick="limparCampos()">Limpar</button>
+    <footer>Relatório Técnico • Gerado localmente</footer>
+  </div>
 
-<div id="resultado"></div>
+  <script>
+    // Preenche data com data atual
+    (function setDefaultDate() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      const iso = yyyy + '-' + mm + '-' + dd;
+      document.getElementById('data').value = iso;
+    })();
 
-<small>Salve como <b>UTF-8 sem BOM</b> para evitar erros no WhatsApp.</small>
-
-</div>
-
-<script>
-(function(){
-    const d = new Date();
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const dd = String(d.getDate()).padStart(2,'0');
-    document.getElementById("data").value = `${yyyy}-${mm}-${dd}`;
-})();
-
-let contador = 0;
-
-function adicionarEvento(){
-    contador++;
-
-    const div = document.createElement("div");
-    div.className = "equipamento";
-    div.id = "evento_" + contador;
-
-    div.innerHTML = `
-        <label>🧰 Equipamento:</label>
-        <input type="text" class="equip">
-
-        <label>❗ Problema:</label>
-        <textarea class="prob"></textarea>
-
-        <label>🔧 Ação:</label>
-        <textarea class="acao"></textarea>
-
-        <button class="danger" onclick="removerEvento(${contador})">Remover Equipamento</button>
-    `;
-
-    document.getElementById("eventos").appendChild(div);
-}
-
-function removerEvento(id){
-    const box = document.getElementById("evento_" + id);
-    if (box) box.remove();
-}
-
-function formatDateBR(d){
-    const p = d.split("-");
-    return `${p[2]}/${p[1]}/${p[0]}`;
-}
-
-function gerarRelatorio(){
-    const data = document.getElementById("data").value;
-    const turno = document.getElementById("turno").value;
-    const tecnico = document.getElementById("tecnico").value.trim();
-    const preventivo = document.getElementById("preventivo").value;
-    const eventos = document.querySelectorAll(".equipamento");
-
-    if (!data || !tecnico){
-        alert("Preencha Data e Técnico.");
-        return;
+    // Função para tocar um beep curto usando Web Audio API
+    function playBeep(duration = 0.08, frequency = 880, volume = 0.08) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = frequency;
+        g.gain.value = volume;
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start();
+        setTimeout(function(){
+          o.stop();
+          ctx.close();
+        }, duration * 1000);
+      } catch (e) {
+        // Fallback: não fazer nada se não suportado
+        console.log('Audio not supported', e);
+      }
     }
 
-    if (eventos.length === 0){
-        alert("Adicione pelo menos um equipamento.");
+    function gerarRelatorio() {
+      const data = document.getElementById('data').value;
+      const turno = document.getElementById('turno').value;
+      const equipamento = document.getElementById('equipamento').value.trim();
+      const problema = document.getElementById('problema').value.trim();
+      const acao = document.getElementById('acao').value.trim();
+      const oficina = document.getElementById('oficina').value.trim();
+
+      if (!data) {
+        alert('Por favor selecione a data.');
         return;
+      }
+      if (!equipamento && !problema && !acao && !oficina) {
+        alert('Preencha ao menos um campo para gerar o relatório.');
+        return;
+      }
+
+      // Monta a mensagem no padrão
+      let msg = '📋 Relatório de Manutenção\n';
+      msg += '📅 Data: ' + formatDateBR(data) + '\n';
+      msg += '🕓 Turno: ' + turno + '\n\n';
+
+      if (equipamento) {
+        msg += '⚙️ Equipamento: ' + equipamento + '\n';
+      }
+      if (problema) {
+        msg += '❗ Problema: ' + problema + '\n';
+      }
+      if (acao) {
+        msg += '🔧 Ação: ' + acao + '\n';
+      }
+      if (oficina) {
+        msg += '\n🧽 Oficina: ' + oficina + '\n';
+      }
+
+      document.getElementById('resultado').textContent = msg;
+      playBeep(); // som ao gerar
     }
 
-    let msg =
-`📄 Relatório de Manutenção
-📆 Data: ${formatDateBR(data)}
-⏱️ Turno: ${turno}
-👤 Técnico Responsável: ${tecnico}
-
-`;
-
-    eventos.forEach(ev => {
-        const eq = ev.querySelector(".equip").value.trim();
-        const pr = ev.querySelector(".prob").value.trim();
-        const ac = ev.querySelector(".acao").value.trim();
-
-        msg += `🧰 Equipamento: ${eq}\n`;
-        if (pr) msg += `❗ Problema: ${pr}\n`;
-        if (ac) msg += `🔧 Ação: ${ac}\n`;
-        msg += `\n`;
-    });
-
-    msg += `🛡️ Necessita Plano Preventivo? ${preventivo}`;
-
-    document.getElementById("resultado").textContent = msg;
-}
-
-function enviarWhatsApp(){
-    const texto = document.getElementById("resultado").textContent;
-
-    if (!texto){
-        alert("Gere o relatório antes de enviar.");
-        return;
+    function formatDateBR(isoDate) {
+      // isoDate no formato yyyy-mm-dd
+      const parts = isoDate.split('-');
+      if (parts.length === 3) {
+        return parts[2] + '/' + parts[1] + '/' + parts[0];
+      }
+      return isoDate;
     }
 
-    window.open("https://wa.me/?text=" + encodeURIComponent(texto), "_blank");
-}
+    function enviarWhatsApp() {
+      const texto = document.getElementById('resultado').textContent;
+      if (!texto) {
+        alert('Gere o relatório antes de enviar.');
+        return;
+      }
+      playBeep(0.06, 660, 0.06); // som de confirmação
+      // Abre o WhatsApp Web/Aplicativo com a mensagem pronta
+      const url = 'https://wa.me/?text=' + encodeURIComponent(texto);
+      // tenta abrir em nova aba
+      window.open(url, '_blank');
+    }
 
-function limparCampos(){
-    document.getElementById("tecnico").value = "";
-    document.getElementById("eventos").innerHTML = "";
-    document.getElementById("resultado").textContent = "";
-}
-</script>
-
+    function limparCampos() {
+      if (!confirm('Deseja limpar todos os campos?')) return;
+      document.getElementById('equipamento').value = '';
+      document.getElementById('problema').value = '';
+      document.getElementById('acao').value = '';
+      document.getElementById('oficina').value = '';
+      document.getElementById('resultado').textContent = '';
+      playBeep(0.04, 440, 0.04);
+    }
+  </script>
 </body>
 </html>
