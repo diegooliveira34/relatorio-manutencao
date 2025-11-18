@@ -1,242 +1,199 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relatório de Manutenção</title>
-  <style>
-    body { font-family: Arial, sans-serif; background:#f1f5f9; margin:0; padding:18px; color:#222; }
-    .container { max-width:720px; margin:auto; background:#fff; padding:18px; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,0.08); }
-    h2 { text-align:center; color:#2563eb; margin:6px 0 10px; }
-    label { font-weight:700; display:block; margin-top:12px; }
-    input[type="text"], input[type="date"], select, textarea {
-      width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-top:6px; box-sizing:border-box;
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Manutenção</title>
+
+<style>
+    body { font-family: Arial, sans-serif; background:#f1f5f9; margin:0; padding:20px; }
+    .container { max-width:650px; margin:auto; background:white; padding:20px; border-radius:15px; box-shadow:0 2px 10px rgba(0,0,0,0.15); }
+    h2 { text-align:center; color:#2563eb; margin-bottom:15px; }
+
+    label { font-weight:bold; margin-top:12px; display:block; }
+    input, textarea, select {
+        width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-top:5px;
     }
-    button { padding:10px 12px; border:0; border-radius:10px; background:#2563eb; color:white; cursor:pointer; margin-top:12px; }
-    button.secondary { background:#06b6d4; }
-    button.danger { background:#ef4444; }
-    .row { display:flex; gap:8px; margin-top:8px; }
-    .row > * { flex:1; }
-    .equipamento { background:#f8fafc; padding:10px; border-radius:10px; margin-top:10px; border:1px solid #e2e8f0; }
-    #resultado { white-space:pre-wrap; background:#f9fafb; padding:12px; border-radius:8px; margin-top:14px; font-family:monospace; min-height:60px; }
-    small.hint { color:#4b5563; display:block; margin-top:8px; }
-    .controls { display:flex; gap:8px; align-items:center; margin-top:8px; }
-    .controls label { font-weight:normal; margin:0; }
-    input[type="checkbox"] { transform:scale(1.1); margin-right:6px; vertical-align:middle; }
-  </style>
+
+    button {
+        width:100%; padding:12px; border:none; border-radius:10px;
+        background:#2563eb; color:white; font-size:16px; cursor:pointer; margin-top:15px;
+    }
+    button.secondary { background:#0ea5e9; }
+    button.danger { background:#dc2626; margin-top:10px; }
+
+    .equipamento {
+        background:#f1f5f9; padding:12px; border-radius:10px;
+        margin-top:12px; border:1px solid #d1d5db;
+    }
+
+    #resultado {
+        white-space:pre-wrap;
+        background:#f9fafb;
+        padding:15px;
+        border-radius:10px;
+        margin-top:20px;
+        font-size:15px;
+        line-height:1.5;
+    }
+
+    .titulo-bloco {
+        font-weight:bold;
+        margin-top:10px;
+        display:block;
+    }
+
+    small {
+        display:block;
+        text-align:center;
+        margin-top:15px;
+        color:#6b7280;
+    }
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <h2>🗒️ Relatório de Manutenção</h2>
+<div class="container">
 
-    <label>Data:</label>
-    <input type="date" id="data">
+<h2>RELATÓRIO DE MANUTENÇÃO</h2>
 
-    <label>Turno:</label>
-    <select id="turno">
-      <option>1º Turno</option>
-      <option>2º Turno</option>
-      <option>3º Turno</option>
-    </select>
+<label>Data:</label>
+<input type="date" id="data">
 
-    <label>Técnico Responsável:</label>
-    <input type="text" id="tecnico" placeholder="Nome do técnico">
+<label>Turno:</label>
+<select id="turno">
+  <option>1º Turno</option>
+  <option>2º Turno</option>
+  <option>3º Turno</option>
+</select>
 
-    <h3 style="margin-top:14px;">Eventos de Manutenção</h3>
-    <div id="eventos"></div>
+<label>Técnico Responsável:</label>
+<input type="text" id="tecnico" placeholder="Nome do técnico">
 
-    <div class="row">
-      <button onclick="adicionarEvento()">+ Adicionar Equipamento</button>
-      <button class="secondary" onclick="limparCampos()">Limpar</button>
-    </div>
+<h3 style="margin-top:20px;">Eventos de Manutenção</h3>
+<div id="eventos"></div>
 
-    <label style="margin-top:12px;">Necessita Plano Preventivo?</label>
-    <select id="preventivo">
-      <option>Não</option>
-      <option>Sim</option>
-    </select>
+<button onclick="adicionarEvento()">+ Adicionar Equipamento</button>
 
-    <div class="controls">
-      <input type="checkbox" id="usarEmojis" checked>
-      <label for="usarEmojis">Enviar com emojis (marque se quer emojis)</label>
-      <div style="flex:1"></div>
-    </div>
+<label style="margin-top:15px;">Necessita Plano Preventivo?</label>
+<select id="preventivo">
+  <option>Não</option>
+  <option>Sim</option>
+</select>
 
-    <div class="row">
-      <button onclick="gerarRelatorio()">Gerar Relatório</button>
-      <button class="secondary" onclick="enviarWhatsApp()">Enviar via WhatsApp</button>
-    </div>
+<button onclick="gerarRelatorio()">Gerar Relatório</button>
+<button class="secondary" onclick="enviarWhatsApp()">Enviar via WhatsApp</button>
+<button class="secondary" onclick="limparCampos()">Limpar</button>
 
-    <div id="resultado" aria-live="polite"></div>
+<div id="resultado"></div>
 
-    <small class="hint">Salve este arquivo como <strong>UTF-8 sem BOM</strong>. Abra no Chrome do celular para adicionar à tela inicial.</small>
-  </div>
+<small>Salve este arquivo como <b>UTF-8 sem BOM</b> para evitar problemas de caracteres.</small>
+
+</div>
 
 <script>
-  // Preenche data atual
-  (function setDefaultDate(){
+// DATA PADRÃO (HOJE)
+(function(){
     const d = new Date();
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth()+1).padStart(2,'0');
     const dd = String(d.getDate()).padStart(2,'0');
-    const iso = `${yyyy}-${mm}-${dd}`;
-    document.getElementById('data').value = iso;
-  })();
+    document.getElementById("data").value = `${yyyy}-${mm}-${dd}`;
+})();
 
-  let contador = 0;
+let contador = 0;
 
-  function adicionarEvento(){
+// ADICIONAR BLOCO DE EQUIPAMENTO
+function adicionarEvento(){
     contador++;
-    const div = document.createElement('div');
-    div.className = 'equipamento';
-    div.id = 'evento_' + contador;
+
+    const div = document.createElement("div");
+    div.className = "equipamento";
+    div.id = "evento_" + contador;
 
     div.innerHTML = `
-      <label>⚙️ Equipamento:</label>
-      <input type="text" class="equip" placeholder="Ex: Cap 30">
+        <label>Equipamento:</label>
+        <input type="text" class="equip">
 
-      <label>❗ Problema:</label>
-      <textarea class="prob" rows="2" placeholder="Descreva o problema"></textarea>
+        <label>Problema:</label>
+        <textarea class="prob"></textarea>
 
-      <label>🛠️ Ação:</label>
-      <textarea class="acao" rows="2" placeholder="Descreva a ação realizada"></textarea>
+        <label>Ação:</label>
+        <textarea class="acao"></textarea>
 
-      <div style="text-align:right; margin-top:8px;">
         <button class="danger" onclick="removerEvento(${contador})">Remover Equipamento</button>
-      </div>
     `;
-    document.getElementById('eventos').appendChild(div);
-    // rolar para o novo equipamento em dispositivos móveis
-    setTimeout(()=>{ div.scrollIntoView({behavior:'smooth', block:'center'}); }, 120);
-  }
 
-  function removerEvento(id){
-    const el = document.getElementById('evento_' + id);
-    if(el) el.remove();
-  }
+    document.getElementById("eventos").appendChild(div);
+}
 
-  // Mapa de substituição (caso usuário desmarque emojis)
-  const EMOJI_TO_TEXT = {
-    '🗒️': 'Relatório de Manutenção',
-    '📅': 'Data:',
-    '🕒': 'Turno:',
-    '👷': 'Técnico Responsável:',
-    '⚙️': 'Equipamento:',
-    '❗': 'Problema:',
-    '🛠️': 'Ação:',
-    // caso apareça variações sem VS16, adicionamos também:
-    '🗒': 'Relatório de Manutenção',
-    '⚙': 'Equipamento',
-    '🛠': 'Ação'
-  };
+function removerEvento(id){
+    const alvo = document.getElementById("evento_" + id);
+    if(alvo) alvo.remove();
+}
 
-  function substituirEmojisPorTexto(str) {
-    let out = str;
-    // substituir cada ocorrência de emoji por sua descrição
-    for (const [emoji, txt] of Object.entries(EMOJI_TO_TEXT)) {
-      out = out.split(emoji).join(txt);
-    }
-    return out;
-  }
+// FORMATAR DATA
+function formatDateBR(d){
+    const p = d.split("-");
+    return `${p[2]}/${p[1]}/${p[0]}`;
+}
 
-  function gerarRelatorio(){
-    const data = document.getElementById('data').value;
-    const turno = document.getElementById('turno').value;
-    const tecnico = document.getElementById('tecnico').value.trim();
-    const preventivo = document.getElementById('preventivo').value;
-    const eventos = document.querySelectorAll('.equipamento');
+// GERAR RELATÓRIO
+function gerarRelatorio(){
+    const data = document.getElementById("data").value;
+    const turno = document.getElementById("turno").value;
+    const tecnico = document.getElementById("tecnico").value.trim();
+    const preventivo = document.getElementById("preventivo").value;
+    const eventos = document.querySelectorAll(".equipamento");
 
     if(!data || !tecnico){
-      alert('Preencha Data e Técnico.');
-      return;
+        alert("Preencha Data e Técnico.");
+        return;
     }
     if(eventos.length === 0){
-      alert('Adicione pelo menos um equipamento.');
-      return;
+        alert("Adicione pelo menos um equipamento.");
+        return;
     }
 
-    // montar mensagem com emojis padrão (se marcados)
-    let usarEmojis = document.getElementById('usarEmojis').checked;
+    let msg = `RELATÓRIO DE MANUTENÇÃO\n`;
+    msg += `Data: ${formatDateBR(data)}\n`;
+    msg += `Turno: ${turno}\n`;
+    msg += `Técnico Responsável: ${tecnico}\n\n`;
 
-    let msg = '';
-    if (usarEmojis) {
-      msg += `🗒️ Relatório de Manutenção\n`;
-      msg += `📅 Data: ${formatBR(data)}\n`;
-      msg += `🕒 Turno: ${turno}\n`;
-      msg += `👷 Técnico Responsável: ${tecnico}\n\n`;
-    } else {
-      msg += `Relatório de Manutenção\n`;
-      msg += `Data: ${formatBR(data)}\n`;
-      msg += `Turno: ${turno}\n`;
-      msg += `Técnico Responsável: ${tecnico}\n\n`;
-    }
+    eventos.forEach(ev=>{
+        const eq = ev.querySelector(".equip").value.trim();
+        const pr = ev.querySelector(".prob").value.trim();
+        const ac = ev.querySelector(".acao").value.trim();
 
-    eventos.forEach(ev => {
-      const eq = ev.querySelector('.equip').value.trim() || '(não informado)';
-      const pr = ev.querySelector('.prob').value.trim();
-      const ac = ev.querySelector('.acao').value.trim();
-
-      if (usarEmojis) msg += `⚙️ Equipamento: ${eq}\n`;
-      else msg += `Equipamento: ${eq}\n`;
-
-      if(pr) {
-        if (usarEmojis) msg += `❗ Problema: ${pr}\n`;
-        else msg += `Problema: ${pr}\n`;
-      }
-      if(ac) {
-        if (usarEmojis) msg += `🛠️ Ação: ${ac}\n`;
-        else msg += `Ação: ${ac}\n`;
-      }
-      msg += `\n`;
+        msg += `Equipamento: ${eq}\n`;
+        if(pr) msg += `Problema: ${pr}\n`;
+        if(ac) msg += `Ação: ${ac}\n`;
+        msg += `\n`;
     });
 
-    if (usarEmojis) msg += `🛠️ Necessita Plano Preventivo? ${preventivo}`;
-    else msg += `Necessita Plano Preventivo? ${preventivo}`;
+    msg += `Necessita Plano Preventivo? ${preventivo}`;
 
-    // Exibir no resultado
-    document.getElementById('resultado').textContent = msg;
-  }
+    document.getElementById("resultado").textContent = msg;
+}
 
-  function formatBR(iso) {
-    const p = iso.split('-');
-    if (p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`;
-    return iso;
-  }
-
-  function enviarWhatsApp(){
-    let texto = document.getElementById('resultado').textContent;
+// ENVIAR PARA WHATSAPP (100% compatível)
+function enviarWhatsApp(){
+    const texto = document.getElementById("resultado").textContent;
     if(!texto){
-      alert('Gere o relatório antes de enviar.');
-      return;
+        alert("Gere o relatório antes de enviar.");
+        return;
     }
+    window.open("https://wa.me/?text=" + encodeURIComponent(texto), "_blank");
+}
 
-    // Se usuário quer emojis, envia direto.
-    // Se não quer emojis, já montamos sem emojis. Porém alguns dispositivos podem ainda transformar.
-    // Para garantir, se usuário desmarcou 'usarEmojis' deixamos texto puro (sem emoji).
-    if (!document.getElementById('usarEmojis').checked) {
-      // já está sem emojis
-    } else {
-      // pequena proteção: substituir variações conhecidas por versões "puras" antes do encode
-      // (mantemos emojis, mas normalizamos variantes)
-      texto = texto.replace(/⚙️/g, '⚙️').replace(/🛠️/g, '🛠️').replace(/🗒️/g,'🗒️');
-    }
-
-    // encodeURIComponent deve cuidar corretamente de UTF-8
-    const url = 'https://wa.me/?text=' + encodeURIComponent(texto);
-    window.open(url, '_blank');
-  }
-
-  function limparCampos(){
-    if (!confirm('Deseja limpar tudo?')) return;
-    document.getElementById('tecnico').value = '';
-    document.getElementById('eventos').innerHTML = '';
-    document.getElementById('resultado').textContent = '';
-    contador = 0;
-  }
-
-  // dica: caso o WhatsApp ainda mostre �, desmarque 'Enviar com emojis' antes de enviar.
+// RESET
+function limparCampos(){
+    document.getElementById("tecnico").value = "";
+    document.getElementById("eventos").innerHTML = "";
+    document.getElementById("resultado").textContent = "";
+}
 </script>
+
 </body>
 </html>
-
