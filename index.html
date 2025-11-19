@@ -36,6 +36,12 @@ input, textarea, select {
     border-radius:8px;
     border:1px solid #ccc;
     margin-top:5px;
+
+    /* ATIVA CORREÇÃO AUTOMÁTICA */
+    spellcheck: true;
+}
+textarea {
+    min-height:70px;
 }
 button {
     width:100%;
@@ -80,7 +86,7 @@ small {
 <h2>📄 Relatório de Manutenção</h2>
 
 <label>📆 Data:</label>
-<input type="date" id="data">
+<input type="date" id="data" spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences">
 
 <label>⏱️ Turno:</label>
 <select id="turno">
@@ -90,7 +96,9 @@ small {
 </select>
 
 <label>👤 Técnico Responsável:</label>
-<input type="text" id="tecnico" placeholder="Nome do técnico">
+<input type="text" id="tecnico"
+spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"
+placeholder="Nome do técnico">
 
 <h3 style="margin-top:18px;">Eventos de Manutenção</h3>
 <div id="eventos"></div>
@@ -103,13 +111,15 @@ small {
   <option value="Sim">Sim</option>
 </select>
 
-<!-- CAMPOS EXTRAS PARA O PLANO -->
+<!-- CAMPOS DO PLANO PREVENTIVO -->
 <div id="planoExtras" class="hidden">
     <label>🛡️ Equipamento do Plano:</label>
-    <input type="text" id="planoEquip">
+    <input type="text" id="planoEquip"
+    spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences">
 
     <label>🛡️ Descrição do Plano:</label>
-    <textarea id="planoDesc"></textarea>
+    <textarea id="planoDesc"
+    spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"></textarea>
 </div>
 
 <button onclick="gerarRelatorio()">Gerar Relatório</button>
@@ -123,6 +133,7 @@ small {
 </div>
 
 <script>
+/* Define a data atual automaticamente */
 (function(){
     const d = new Date();
     const yyyy = d.getFullYear();
@@ -133,6 +144,7 @@ small {
 
 let contador = 0;
 
+/* Criar novos blocos de equipamentos */
 function adicionarEvento(){
     contador++;
 
@@ -142,13 +154,16 @@ function adicionarEvento(){
 
     div.innerHTML = `
         <label>🧰 Equipamento:</label>
-        <input type="text" class="equip">
+        <input type="text" class="equip"
+        spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences">
 
         <label>❗ Problema:</label>
-        <textarea class="prob"></textarea>
+        <textarea class="prob"
+        spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"></textarea>
 
         <label>🔧 Ação:</label>
-        <textarea class="acao"></textarea>
+        <textarea class="acao"
+        spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"></textarea>
 
         <button class="danger" onclick="removerEvento(${contador})">Remover Equipamento</button>
     `;
@@ -156,11 +171,13 @@ function adicionarEvento(){
     document.getElementById("eventos").appendChild(div);
 }
 
+/* Remover bloco */
 function removerEvento(id){
     const box = document.getElementById("evento_" + id);
     if (box) box.remove();
 }
 
+/* Mostrar campos do plano quando SIM */
 function mostrarCamposPlano(){
     const preventivo = document.getElementById("preventivo").value;
     const extras = document.getElementById("planoExtras");
@@ -174,11 +191,13 @@ function mostrarCamposPlano(){
     }
 }
 
+/* Converte data AAAA-MM-DD para DD/MM/AAAA */
 function formatDateBR(d){
     const p = d.split("-");
     return `${p[2]}/${p[1]}/${p[0]}`;
 }
 
+/* Gerar relatório final */
 function gerarRelatorio(){
     const data = document.getElementById("data").value;
     const turno = document.getElementById("turno").value;
@@ -234,6 +253,7 @@ function gerarRelatorio(){
     document.getElementById("resultado").textContent = msg;
 }
 
+/* Enviar via WhatsApp */
 function enviarWhatsApp(){
     const texto = document.getElementById("resultado").textContent;
 
@@ -245,6 +265,7 @@ function enviarWhatsApp(){
     window.open("https://wa.me/?text=" + encodeURIComponent(texto), "_blank");
 }
 
+/* Limpar tudo */
 function limparCampos(){
     document.getElementById("tecnico").value = "";
     document.getElementById("eventos").innerHTML = "";
@@ -257,3 +278,4 @@ function limparCampos(){
 
 </body>
 </html>
+
