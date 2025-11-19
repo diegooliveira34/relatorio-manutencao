@@ -36,13 +36,8 @@ input, textarea, select {
     border-radius:8px;
     border:1px solid #ccc;
     margin-top:5px;
-
-    /* ATIVA CORREÇÃO AUTOMÁTICA */
-    spellcheck: true;
 }
-textarea {
-    min-height:70px;
-}
+textarea { min-height:70px; }
 button {
     width:100%;
     padding:12px;
@@ -62,7 +57,6 @@ button.danger { background:#dc2626; margin-top:10px; }
     padding:15px;
     border-radius:10px;
     margin-top:20px;
-    font-family: Arial, sans-serif;
 }
 .equipamento {
     background:#f0f4f8;
@@ -96,9 +90,7 @@ small {
 </select>
 
 <label>👤 Técnico Responsável:</label>
-<input type="text" id="tecnico"
-spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"
-placeholder="Nome do técnico">
+<input type="text" id="tecnico" spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences">
 
 <h3 style="margin-top:18px;">Eventos de Manutenção</h3>
 <div id="eventos"></div>
@@ -114,12 +106,10 @@ placeholder="Nome do técnico">
 <!-- CAMPOS DO PLANO PREVENTIVO -->
 <div id="planoExtras" class="hidden">
     <label>🛡️ Equipamento do Plano:</label>
-    <input type="text" id="planoEquip"
-    spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences">
+    <select id="planoEquipSelect"></select>
 
     <label>🛡️ Descrição do Plano:</label>
-    <textarea id="planoDesc"
-    spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"></textarea>
+    <textarea id="planoDesc" spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"></textarea>
 </div>
 
 <button onclick="gerarRelatorio()">Gerar Relatório</button>
@@ -128,12 +118,11 @@ placeholder="Nome do técnico">
 
 <div id="resultado"></div>
 
-<small>Salve como <b>UTF-8 sem BOM</b> para evitar erros no WhatsApp.</small>
+<small>Salve como <b>UTF-8 sem BOM</b>.</small>
 
 </div>
 
 <script>
-/* Define a data atual automaticamente */
 (function(){
     const d = new Date();
     const yyyy = d.getFullYear();
@@ -144,7 +133,21 @@ placeholder="Nome do técnico">
 
 let contador = 0;
 
-/* Criar novos blocos de equipamentos */
+function atualizarListaEquipPlano(){
+    const select = document.getElementById("planoEquipSelect");
+    select.innerHTML = "";
+
+    const equipamentos = document.querySelectorAll(".equip");
+    equipamentos.forEach(eq => {
+        const nome = eq.value.trim();
+        if (nome !== ""){
+            const option = document.createElement("option");
+            option.textContent = nome;
+            select.appendChild(option);
+        }
+    });
+}
+
 function adicionarEvento(){
     contador++;
 
@@ -155,7 +158,8 @@ function adicionarEvento(){
     div.innerHTML = `
         <label>🧰 Equipamento:</label>
         <input type="text" class="equip"
-        spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences">
+        spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"
+        oninput="atualizarListaEquipPlano()">
 
         <label>❗ Problema:</label>
         <textarea class="prob"
@@ -169,41 +173,39 @@ function adicionarEvento(){
     `;
 
     document.getElementById("eventos").appendChild(div);
+    atualizarListaEquipPlano();
 }
 
-/* Remover bloco */
 function removerEvento(id){
     const box = document.getElementById("evento_" + id);
     if (box) box.remove();
+    atualizarListaEquipPlano();
 }
 
-/* Mostrar campos do plano quando SIM */
 function mostrarCamposPlano(){
     const preventivo = document.getElementById("preventivo").value;
     const extras = document.getElementById("planoExtras");
 
     if (preventivo === "Sim"){
         extras.classList.remove("hidden");
+        atualizarListaEquipPlano();
     } else {
         extras.classList.add("hidden");
-        document.getElementById("planoEquip").value = "";
         document.getElementById("planoDesc").value = "";
     }
 }
 
-/* Converte data AAAA-MM-DD para DD/MM/AAAA */
 function formatDateBR(d){
     const p = d.split("-");
     return `${p[2]}/${p[1]}/${p[0]}`;
 }
 
-/* Gerar relatório final */
 function gerarRelatorio(){
     const data = document.getElementById("data").value;
     const turno = document.getElementById("turno").value;
     const tecnico = document.getElementById("tecnico").value.trim();
     const preventivo = document.getElementById("preventivo").value;
-    const planoEquip = document.getElementById("planoEquip").value.trim();
+    const planoEquip = document.getElementById("planoEquipSelect").value;
     const planoDesc = document.getElementById("planoDesc").value.trim();
     const eventos = document.querySelectorAll(".equipamento");
 
@@ -219,7 +221,7 @@ function gerarRelatorio(){
 
     if (preventivo === "Sim"){
         if (!planoEquip || !planoDesc){
-            alert("Preencha o equipamento e a descrição do plano preventivo.");
+            alert("Selecione o equipamento e preencha a descrição do plano.");
             return;
         }
     }
@@ -253,7 +255,6 @@ function gerarRelatorio(){
     document.getElementById("resultado").textContent = msg;
 }
 
-/* Enviar via WhatsApp */
 function enviarWhatsApp(){
     const texto = document.getElementById("resultado").textContent;
 
@@ -265,17 +266,14 @@ function enviarWhatsApp(){
     window.open("https://wa.me/?text=" + encodeURIComponent(texto), "_blank");
 }
 
-/* Limpar tudo */
 function limparCampos(){
     document.getElementById("tecnico").value = "";
     document.getElementById("eventos").innerHTML = "";
     document.getElementById("resultado").textContent = "";
     document.getElementById("planoExtras").classList.add("hidden");
-    document.getElementById("planoEquip").value = "";
     document.getElementById("planoDesc").value = "";
 }
 </script>
 
 </body>
 </html>
-
