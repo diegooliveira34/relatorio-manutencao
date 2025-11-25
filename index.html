@@ -77,7 +77,7 @@ small {
 <body>
 <div class="container">
 
-<h2>📄 Relatório de Manutenção</h2>
+<h2><b>RELATÓRIO DE MANUTENÇÃO</b></h2>
 
 <label>📆 Data:</label>
 <input type="date" id="data" spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences">
@@ -92,23 +92,22 @@ small {
 <label>👤 Técnico Responsável:</label>
 <input type="text" id="tecnico" spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences">
 
-<h3 style="margin-top:18px;">Eventos de Manutenção</h3>
+<h3 style="margin-top:18px;">EVENTOS DE MANUTENÇÃO</h3>
 <div id="eventos"></div>
 
 <button onclick="adicionarEvento()">+ Adicionar Equipamento</button>
 
-<label style="margin-top:15px;">🛡️ Necessita Plano Preventivo?</label>
+<label style="margin-top:15px;"><b>NECESSITA PLANO PREVENTIVO?</b></label>
 <select id="preventivo" onchange="mostrarCamposPlano()">
   <option value="Não">Não</option>
   <option value="Sim">Sim</option>
 </select>
 
-<!-- CAMPOS DO PLANO PREVENTIVO -->
 <div id="planoExtras" class="hidden">
-    <label>🛡️ Equipamento do Plano:</label>
+    <label><b>EQUIPAMENTO DO PLANO</b>:</label>
     <select id="planoEquipSelect"></select>
 
-    <label>🛡️ Descrição do Plano:</label>
+    <label><b>DESCRIÇÃO DO PLANO</b>:</label>
     <textarea id="planoDesc" spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"></textarea>
 </div>
 
@@ -156,16 +155,16 @@ function adicionarEvento(){
     div.id = "evento_" + contador;
 
     div.innerHTML = `
-        <label>🧰 Equipamento:</label>
+        <label><b>EQUIPAMENTO</b>:</label>
         <input type="text" class="equip"
         spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"
         oninput="atualizarListaEquipPlano()">
 
-        <label>❗ Problema:</label>
+        <label><b>PROBLEMA</b>:</label>
         <textarea class="prob"
         spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"></textarea>
 
-        <label>🔧 Ação:</label>
+        <label><b>AÇÃO</b>:</label>
         <textarea class="acao"
         spellcheck="true" autocorrect="on" autocomplete="on" autocapitalize="sentences"></textarea>
 
@@ -227,7 +226,7 @@ function gerarRelatorio(){
     }
 
     let msg =
-`📄 Relatório de Manutenção
+`📄 RELATÓRIO DE MANUTENÇÃO
 📆 Data: ${formatDateBR(data)}
 ⏱️ Turno: ${turno}
 👤 Técnico Responsável: ${tecnico}
@@ -239,17 +238,17 @@ function gerarRelatorio(){
         const pr = ev.querySelector(".prob").value.trim();
         const ac = ev.querySelector(".acao").value.trim();
 
-        msg += `🧰 Equipamento: ${eq}\n`;
-        if (pr) msg += `❗ Problema: ${pr}\n`;
-        if (ac) msg += `🔧 Ação: ${ac}\n`;
+        msg += `EQUIPAMENTO: ${eq}\n`;
+        if (pr) msg += `PROBLEMA: ${pr}\n`;
+        if (ac) msg += `AÇÃO: ${ac}\n`;
         msg += `\n`;
     });
 
-    msg += `🛡️ Necessita Plano Preventivo? ${preventivo}`;
+    msg += `NECESSITA PLANO PREVENTIVO: ${preventivo}`;
 
     if (preventivo === "Sim"){
-        msg += `\n🛡️ Equipamento do Plano: ${planoEquip}`;
-        msg += `\n🛡️ Descrição do Plano: ${planoDesc}`;
+        msg += `\nEQUIPAMENTO DO PLANO: ${planoEquip}`;
+        msg += `\nDESCRIÇÃO DO PLANO: ${planoDesc}`;
     }
 
     document.getElementById("resultado").textContent = msg;
@@ -277,3 +276,5 @@ function limparCampos(){
 
 </body>
 </html>
+
+
